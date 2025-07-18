@@ -1,3 +1,4 @@
+// vercel.json
 {
   "version": 2,
   "builds": [
@@ -5,7 +6,10 @@
       "src": "app.py",
       "use": "@vercel/python",
       "config": {
-        "pythonVersion": "3.9.13"
+        "pythonVersion": "3.9.13" // This sets the runtime Python version
+      },
+      "env": {
+        "PYTHON_VERSION": "3.9.13" // This forces the build Python version
       }
     }
   ],
