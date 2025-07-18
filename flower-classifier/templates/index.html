@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flower Classification</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4a5568;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .upload-section {
+            text-align: center;
+            padding: 30px;
+            border: 3px dashed #cbd5e0;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            background: rgba(247, 250, 252, 0.8);
+            transition: all 0.3s ease;
+        }
+        
+        .upload-section:hover {
+            border-color: #667eea;
+            background: rgba(247, 250, 252, 1);
+            transform: translateY(-2px);
+        }
+        
+        .file-input {
+            margin: 20px 0;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: white;
+            font-size: 16px;
+        }
+        
+        .predict-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .predict-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+        
+        .predict-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .image-preview {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .image-preview img {
+            max-width: 400px;
+            max-height: 400px;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .image-preview img:hover {
+            transform: scale(1.05);
+        }
+        
+        .results {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .confidence-bar {
+            background: rgba(255,255,255,0.3);
+            height: 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .feedback-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .feedback-buttons {
+            margin: 20px 0;
+        }
+        
+        .feedback-btn {
+            margin: 0 10px;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .correct-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .incorrect-btn {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+            color: white;
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+        }
+        
+        .feedback-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        .stats {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .loading {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            color: #667eea;
+            font-size: 18px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            color: #f44336;
+            background: rgba(244, 67, 54, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .success {
+            color: #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .class-selector {
+            margin: 15px 0;
+        }
+        
+        .class-selector select {
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            font-size: 16px;
+            min-width: 200px;
+        }
+        
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .prediction-item:last-child {
+            border-bottom: none;
+        }
+        
+        .flower-emoji {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="flower-emoji">🌸🌺🌻🌷🌹</div>
+        <h1>Flower Classification System</h1>
+        
+        <div class="upload-section">
+            <h3>Upload a flower image to classify</h3>
+            <input type="file" id="imageInput" accept="image/*" class="file-input">
+            <br><br>
+            <button id="predictBtn" class="predict-btn" disabled>🔍 Classify Flower</button>
+        </div>
+        
+        <div id="imagePreview" class="image-preview" style="display: none;">
+            <img id="previewImg" alt="Preview">
+        </div>
+        
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>🤖 AI is analyzing your flower...</p>
+        </div>
+        
+        <div id="results" class="results" style="display: none;">
+            <h3>🎯 Classification Results</h3>
+            <div style="font-size: 1.2em; margin-bottom: 15px;">
+                <strong>Predicted Class:</strong> <span id="predictedClass"></span>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <strong>Confidence:</strong> <span id="confidence"></span>%
+                <div class="confidence-bar">
+                    <div id="confidenceBar" class="confidence-fill"></div>
+                </div>
+            </div>
+            <div id="allPredictions">
+                <h4>All Predictions:</h4>
+                <div id="predictionsList"></div>
+            </div>
+        </div>
+        
+        <div id="feedbackSection" class="feedback-section" style="display: none;">
+            <h3>💬 Was this prediction correct?</h3>
+            <p>Your feedback helps improve the AI model!</p>
+            <div class="feedback-buttons">
+                <button id="correctBtn" class="feedback-btn correct-btn">✓ Correct</button>
+                <button id="incorrectBtn" class="feedback-btn incorrect-btn">✗ Incorrect</button>
+            </div>
+            <div id="incorrectFeedback" style="display: none;">
+                <p>What should the correct classification be?</p>
+                <div class="class-selector">
+                    <select id="correctClassSelect">
+                        <option value="">Select correct class...</option>
+                    </select>
+                </div>
+                <button id="submitFeedbackBtn" class="feedback-btn">Submit Feedback</button>
+            </div>
+            <div id="feedbackMessage"></div>
+        </div>
+        
+        <div id="stats" class="stats">
+            <h3>📊 System Performance</h3>
+            <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+                <div>
+                    <div style="font-size: 2em; font-weight: bold; color: #667eea;">
+                        <span id="totalFeedback">0</span>
+                    </div>
+                    <div>Total Feedback</div>
+                </div>
+                <div>
+                    <div style="font-size: 2em; font-weight: bold; color: #4CAF50;">
+                        <span id="accuracy">0</span>%
+                    </div>
+                    <div>Accuracy</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = '';  // Empty since we're serving from the same domain
+        
+        let currentPredictionId = null;
+        let availableClasses = [];
+        
+        // DOM elements
+        const imageInput = document.getElementById('imageInput');
+        const predictBtn = document.getElementById('predictBtn');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const feedbackSection = document.getElementById('feedbackSection');
+        const correctBtn = document.getElementById('correctBtn');
+        const incorrectBtn = document.getElementById('incorrectBtn');
+        const incorrectFeedback = document.getElementById('incorrectFeedback');
+        const correctClassSelect = document.getElementById('correctClassSelect');
+        const submitFeedbackBtn = document.getElementById('submitFeedbackBtn');
+        const feedbackMessage = document.getElementById('feedbackMessage');
+        
+        // Load classes on page load
+        loadClasses();
+        loadStats();
+        
+        // Event listeners
+        imageInput.addEventListener('change', handleImageSelection);
+        predictBtn.addEventListener('click', classifyImage);
+        correctBtn.addEventListener('click', () => submitFeedback(true));
+        incorrectBtn.addEventListener('click', () => showIncorrectFeedback());
+        submitFeedbackBtn.addEventListener('click', () => submitIncorrectFeedback());
+        
+        async function loadClasses() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/classes`);
+                const data = await response.json();
+                availableClasses = data.classes;
+                
+                // Populate correct class selector
+                correctClassSelect.innerHTML = '<option value="">Select correct class...</option>';
+                availableClasses.forEach(className => {
+                    const option = document.createElement('option');
+                    option.value = className;
+                    option.textContent = className.charAt(0).toUpperCase() + className.slice(1);
+                    correctClassSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading classes:', error);
+            }
+        }
+        
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/feedback-stats`);
+                const data = await response.json();
+                
+                document.getElementById('totalFeedback').textContent = data.total_feedback;
+                document.getElementById('accuracy').textContent = data.accuracy;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+        
+        function handleImageSelection(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+                predictBtn.disabled = false;
+                
+                // Hide previous results
+                results.style.display = 'none';
+                feedbackSection.style.display = 'none';
+            }
+        }
+        
+        async function classifyImage() {
+            const file = imageInput.files[0];
+            if (!file) return;
+            
+            loading.style.display = 'block';
+            predictBtn.disabled = true;
+            results.style.display = 'none';
+            feedbackSection.style.display = 'none';
+            
+            const formData = new FormData();
+            formData.append('image', file);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/predict`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Store prediction ID for feedback
+                currentPredictionId = data.prediction_id;
+                
+                // Display results
+                document.getElementById('predictedClass').textContent = 
+                    data.predicted_class.charAt(0).toUpperCase() + data.predicted_class.slice(1);
+                document.getElementById('confidence').textContent = (data.confidence * 100).toFixed(2);
+                
+                // Update confidence bar
+                const confidenceBar = document.getElementById('confidenceBar');
+                confidenceBar.style.width = (data.confidence * 100) + '%';
+                
+                // Show all predictions
+                const predictionsList = document.getElementById('predictionsList');
+                predictionsList.innerHTML = '';
+                
+                Object.entries(data.all_predictions)
+                    .sort((a, b) => b[1] - a[1])
+                    .forEach(([className, confidence]) => {
+                        const item = document.createElement('div');
+                        item.className = 'prediction-item';
+                        item.innerHTML = `
+                            <span>${className.charAt(0).toUpperCase() + className.slice(1)}</span>
+                            <span>${(confidence * 100).toFixed(2)}%</span>
+                        `;
+                        predictionsList.appendChild(item);
+                    });
+                
+                results.style.display = 'block';
+                feedbackSection.style.display = 'block';
+                
+            } catch (error) {
+                feedbackMessage.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            } finally {
+                loading.style.display = 'none';
+                predictBtn.disabled = false;
+            }
+        }
+        
+        async function submitFeedback(isCorrect) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/feedback`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prediction_id: currentPredictionId,
+                        is_correct: isCorrect,
+                        correct_class: ''
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                feedbackMessage.innerHTML = '<div class="success">Thank you for your feedback!</div>';
+                
+                // Refresh stats
+                loadStats();
+                
+                // Hide feedback section
+                setTimeout(() => {
+                    feedbackSection.style.display = 'none';
+                }, 2000);
+                
+            } catch (error) {
+                feedbackMessage.innerHTML = `<div class="error">Error submitting feedback: ${error.message}</div>`;
+            }
+        }
+        
+        function showIncorrectFeedback() {
+            incorrectFeedback.style.display = 'block';
+        }
+        
+        async function submitIncorrectFeedback() {
+            const correctClass = correctClassSelect.value;
+            
+            if (!correctClass) {
+                feedbackMessage.innerHTML = '<div class="error">Please select the correct class.</div>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/feedback`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prediction_id: currentPredictionId,
+                        is_correct: false,
+                        correct_class: correctClass
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                feedbackMessage.innerHTML = '<div class="success">Thank you for the correction!</div>';
+                
+                // Refresh stats
+                loadStats();
+                
+                // Hide feedback section
+                setTimeout(() => {
+                    feedbackSection.style.display = 'none';
+                    incorrectFeedback.style.display = 'none';
+                }, 2000);
+                
+            } catch (error) {
+                feedbackMessage.innerHTML = `<div class="error">Error submitting feedback: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
