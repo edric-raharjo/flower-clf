@@ -6,10 +6,7 @@
       "src": "app.py",
       "use": "@vercel/python",
       "config": {
-        "pythonVersion": "3.9.13" 
-      },
-      "env": {
-        "PYTHON_VERSION": "3.9.13" 
+        "pythonVersion": "3.9.13"
       }
     }
   ],
