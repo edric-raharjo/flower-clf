@@ -1,4 +1,4 @@
-setuptools
+setuptools==69.5.1 
 gunicorn 
 tensorflow==2.19.0
 tensorflow-datasets==4.9.2
