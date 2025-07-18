@@ -1,5 +1,5 @@
 gunicorn 
-tensorflow==2.13.0
+tensorflow==2.19.0
 tensorflow-datasets==4.9.2
 pillow==9.5.0
 flask==2.3.2
