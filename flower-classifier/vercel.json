@@ -3,7 +3,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "flower-classifier/app.py",
+      "src": "app.py",  
       "use": "@vercel/python",
       "config": {
         "pythonVersion": "3.9.13"
@@ -13,7 +13,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "flower-classifier/app.py"
+      "dest": "app.py"
     }
   ]
 }
